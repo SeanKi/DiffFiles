@@ -7,6 +7,7 @@
 #include "DiffFiles.h"
 #include "DiffFilesDlg.h"
 #include "afxdialogex.h"
+#include "ProfilePrivate.h"
 
 #include <filesystem>
 #ifndef INLINE_CONSOLE_H
@@ -78,6 +79,8 @@ bool equalFiles(ifstream& in1, ifstream& in2)
 	return true;
 }
 
+CProfilePrivate	g_Profile;
+
 // CAboutDlg dialog used for App About
 
 class CAboutDlg : public CDialogEx
@@ -139,6 +142,8 @@ BEGIN_MESSAGE_MAP(CDiffFilesDlg, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 	ON_BN_CLICKED(IDC_BTN_GO, &CDiffFilesDlg::OnBnClickedBtnGo)
+	ON_WM_CLOSE()
+	ON_BN_CLICKED(IDOK, &CDiffFilesDlg::OnBnClickedOk)
 END_MESSAGE_MAP()
 
 
@@ -174,10 +179,15 @@ BOOL CDiffFilesDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// Set small icon
 
 	// TODO: Add extra initialization here
-	m_sFileExp = "Scan%d.raw";
-	m_nNum1 = 1;
-	m_nNum2 = 100;
+	//m_sFileExp = "Scan%d.raw";
+	//m_nNum1 = 1;
+	//m_nNum2 = 100;
 
+	g_Profile.SetFilename(_T(".\\DiffFiles.ini"));
+	g_Profile.SetSection(_T("common"));
+	g_Profile.GetString(_T("FileExp"), m_sFileExp, _T("Scan%d.raw"));
+	m_nNum1 = g_Profile.GetInt(_T("Num1"), 1);
+	m_nNum2 = g_Profile.GetInt(_T("Num2"), 100);
 	UpdateData(FALSE);
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -276,7 +286,6 @@ void CDiffFilesDlg::CompareFiles(const CString& fileExp, int nNum1, int nNum2)
 			
 			TRACE(CA2CT(result.str().c_str()));
 			logFile << result.str();
-            nCount++;
         }
         catch (const exception& ex) {
             cerr << ex.what() << endl;
@@ -291,4 +300,25 @@ void CDiffFilesDlg::OnBnClickedBtnGo()
 	
 	CompareFiles(m_sFileExp, m_nNum1, m_nNum2);
 	// TODO: Add your control notification handler code here
+}
+
+void CDiffFilesDlg::SaveConfig()
+{
+	UpdateData(TRUE);
+	g_Profile.WriteString(_T("common"), _T("FileExp"), m_sFileExp);
+	g_Profile.WriteInt(_T("common"), _T("Num1"), m_nNum1);
+	g_Profile.WriteInt(_T("common"), _T("Num2"), m_nNum2);
+}
+void CDiffFilesDlg::OnClose()
+{
+	SaveConfig();
+
+	CDialogEx::OnClose();
+}
+
+
+void CDiffFilesDlg::OnBnClickedOk()
+{
+	SaveConfig();
+	CDialogEx::OnOK();
 }

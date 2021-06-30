@@ -39,4 +39,7 @@ public:
 //	CString m_sNum2;
 	int m_nNum1;
 	int m_nNum2;
+	void SaveConfig();
+	afx_msg	void OnClose();
+	afx_msg void OnBnClickedOk();
 };

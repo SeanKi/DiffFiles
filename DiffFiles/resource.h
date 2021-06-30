@@ -10,7 +10,6 @@
 #define IDC_ED_FILEEXP                  1000
 #define IDC_BTN_GO                      1001
 #define IDC_ED_NUM1                     1002
-#define IDC_EDIT2                       1003
 #define IDC_ED_NUM2                     1003
 
 // Next default values for new objects
